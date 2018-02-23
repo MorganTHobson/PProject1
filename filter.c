@@ -18,7 +18,7 @@
 
 /* Example filter sizes */
 #define DATA_LEN  512*512*256
-#define FILTER_LEN  1024
+#define FILTER_LEN  8
 
 
 /* Subtract the `struct timeval' values X and Y,
@@ -206,15 +206,24 @@ int main( int argc, char** argv )
   FILE *pff;
 
   /* Initialize csvs */
-  sdf=fopen("serial-data.csv","w+");
-  sff=fopen("serial-filter.csv","w+");
-  pdf=fopen("parallel-data.csv","w+");
-  pff=fopen("parallel-filter.csv","w+");
+  sdf=fopen("serial-data.csv","a");
+  sff=fopen("serial-filter.csv","a");
+  pdf=fopen("parallel-data.csv","a");
+  pff=fopen("parallel-filter.csv","a");
 
-  fprintf(sdf, "filter length,sec,ms\n");
-  fprintf(sff, "filter length,sec,ms\n");
-  fprintf(pdf, "filter length,sec,ms\n");
-  fprintf(pff, "filter length,sec,ms\n");
+  struct stat st;
+  stat("serial-data.csv", &st);
+  if (st.st_size < 1)
+    fprintf(sdf, "filter length,sec,us\n");
+  stat("serial-filter.csv", &st);
+  if (st.st_size < 1)
+    fprintf(sff, "filter length,sec,us\n");
+  stat("parallel-data.csv", &st);
+  if (st.st_size < 1)
+    fprintf(pdf, "filter length,sec,us\n");
+  stat("parallel-filter.csv", &st);
+  if (st.st_size < 1)
+    fprintf(pff, "filter length,sec,us\n");
 
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
