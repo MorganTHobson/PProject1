@@ -18,8 +18,8 @@
 
 /* Example filter sizes */
 #define DATA_LEN  512*512*256
-#define FILTER_LEN  8
-
+#define FILTER_LEN  1024
+#define THREADS 1
 
 /* Subtract the `struct timeval' values X and Y,
     storing the result in RESULT.
@@ -197,7 +197,7 @@ int main( int argc, char** argv )
   unsigned int * filter_list;
 
   /* Set thread count */
-  omp_set_num_threads(1);
+  omp_set_num_threads(THREADS);
 
   /* Makde csv pointers */
   FILE *sdf;
@@ -261,13 +261,13 @@ int main( int argc, char** argv )
     checkData ( serial_array, output_array );
     memset ( output_array, 0, DATA_LEN );
 
-    parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff );
-    checkData ( serial_array, output_array );
-    memset ( output_array, 0, DATA_LEN );
+//    parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff );
+//    checkData ( serial_array, output_array );
+//    memset ( output_array, 0, DATA_LEN );
 
-    parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf );
-    checkData ( serial_array, output_array );
-    memset ( output_array, 0, DATA_LEN );
+//    parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf );
+//    checkData ( serial_array, output_array );
+//    memset ( output_array, 0, DATA_LEN );
   }
 
   fclose(sdf);
