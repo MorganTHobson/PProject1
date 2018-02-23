@@ -211,16 +211,21 @@ int main( int argc, char** argv )
   pdf=fopen("parallel-data.csv","a");
   pff=fopen("parallel-filter.csv","a");
 
+  /* Initialize headers */
   struct stat st;
+
   stat("serial-data.csv", &st);
   if (st.st_size < 1)
     fprintf(sdf, "filter length,sec,us\n");
+
   stat("serial-filter.csv", &st);
   if (st.st_size < 1)
     fprintf(sff, "filter length,sec,us\n");
+
   stat("parallel-data.csv", &st);
   if (st.st_size < 1)
     fprintf(pdf, "filter length,sec,us\n");
+
   stat("parallel-filter.csv", &st);
   if (st.st_size < 1)
     fprintf(pff, "filter length,sec,us\n");
