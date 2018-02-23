@@ -18,7 +18,7 @@
 
 /* Example filter sizes */
 #define DATA_LEN  512*512*256
-#define FILTER_LEN  16
+#define FILTER_LEN  1024
 
 
 /* Subtract the `struct timeval' values X and Y,
@@ -211,10 +211,10 @@ int main( int argc, char** argv )
   pdf=fopen("parallel-data.csv","w+");
   pff=fopen("parallel-filter.csv","w+");
 
-  fprintf(sdf, "filter length,sec,ms");
-  fprintf(sff, "filter length,sec,ms");
-  fprintf(pdf, "filter length,sec,ms");
-  fprintf(pff, "filter length,sec,ms");
+  fprintf(sdf, "filter length,sec,ms\n");
+  fprintf(sff, "filter length,sec,ms\n");
+  fprintf(pdf, "filter length,sec,ms\n");
+  fprintf(pff, "filter length,sec,ms\n");
 
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
