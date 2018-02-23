@@ -192,6 +192,8 @@ int main( int argc, char** argv )
   unsigned int * output_array;
   unsigned int * filter_list;
 
+  omp_set_num_threads(1);
+
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
 //  input_array = (unsigned int*) posix_memalign ( DATA_LEN * sizeof(unsigned int), 4096);
