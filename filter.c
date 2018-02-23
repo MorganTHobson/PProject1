@@ -18,7 +18,7 @@
 
 /* Example filter sizes */
 #define DATA_LEN  512*512*256
-#define FILTER_LEN  1024
+#define FILTER_LEN  16
 
 
 /* Subtract the `struct timeval' values X and Y,
@@ -48,7 +48,7 @@ int timeval_subtract (struct timeval * result, struct timeval * x, struct timeva
 }
 
 /* Function to apply the filter with the filter list in the outside loop */
-void serialFilterFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list )
+void serialFilterFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
@@ -74,11 +74,12 @@ void serialFilterFirst ( int data_len, unsigned int* input_array, unsigned int* 
   timeval_subtract ( &tresult, &tb, &ta );
 
   printf ("Serial filter first took %lu seconds and %lu microseconds.  Filter length = %d\n", tresult.tv_sec, tresult.tv_usec, filter_len );
+  fprintf (fp, "%d,%lu,%lu\n", filter_len, tresult.tv_sec, tresult.tv_usec);
 }
 
 
 /* Function to apply the filter with the filter list in the outside loop */
-void serialDataFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list )
+void serialDataFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
@@ -104,10 +105,11 @@ void serialDataFirst ( int data_len, unsigned int* input_array, unsigned int* ou
   timeval_subtract ( &tresult, &tb, &ta );
 
   printf ("Serial data first took %lu seconds and %lu microseconds.  Filter length = %d\n", tresult.tv_sec, tresult.tv_usec, filter_len );
+  fprintf (fp, "%d,%lu,%lu\n", filter_len, tresult.tv_sec, tresult.tv_usec);
 }
 
 /* Function to apply the filter with the filter list in the outside loop */
-void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list )
+void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
@@ -134,11 +136,12 @@ void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int
   timeval_subtract ( &tresult, &tb, &ta );
 
   printf ("Parallel filter first took %lu seconds and %lu microseconds.  Filter length = %d\n", tresult.tv_sec, tresult.tv_usec, filter_len );
+  fprintf (fp, "%d,%lu,%lu\n", filter_len, tresult.tv_sec, tresult.tv_usec);
 }
 
 
 /* Function to apply the filter with the filter list in the outside loop */
-void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list )
+void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
@@ -165,6 +168,7 @@ void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* 
   timeval_subtract ( &tresult, &tb, &ta );
 
   printf ("Parallel data first took %lu seconds and %lu microseconds.  Filter length = %d\n", tresult.tv_sec, tresult.tv_usec, filter_len );
+  fprintf (fp, "%d,%lu,%lu\n", filter_len, tresult.tv_sec, tresult.tv_usec);
 }
 
 
@@ -192,7 +196,25 @@ int main( int argc, char** argv )
   unsigned int * output_array;
   unsigned int * filter_list;
 
+  /* Set thread count */
   omp_set_num_threads(1);
+
+  /* Makde csv pointers */
+  FILE *sdf;
+  FILE *sff;
+  FILE *pdf;
+  FILE *pff;
+
+  /* Initialize csvs */
+  sdf=fopen("serial-data.csv","w+");
+  sff=fopen("serial-filter.csv","w+");
+  pdf=fopen("parallel-data.csv","w+");
+  pff=fopen("parallel-filter.csv","w+");
+
+  fprintf(sdf, "filter length,sec,ms");
+  fprintf(sff, "filter length,sec,ms");
+  fprintf(pdf, "filter length,sec,ms");
+  fprintf(pff, "filter length,sec,ms");
 
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
@@ -218,20 +240,25 @@ int main( int argc, char** argv )
   /* Execute at a variety of filter lengths */
   for ( int filter_len =1; filter_len<=FILTER_LEN; filter_len*=2) 
   {
-    serialDataFirst ( DATA_LEN, input_array, serial_array, filter_len, filter_list );
+    serialDataFirst ( DATA_LEN, input_array, serial_array, filter_len, filter_list, sdf );
     memset ( output_array, 0, DATA_LEN );
 
-    serialFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list );
+    serialFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, sff );
     checkData ( serial_array, output_array );
     memset ( output_array, 0, DATA_LEN );
 
-    parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list );
+    parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff );
     checkData ( serial_array, output_array );
     memset ( output_array, 0, DATA_LEN );
 
-    parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list );
+    parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf );
     checkData ( serial_array, output_array );
     memset ( output_array, 0, DATA_LEN );
   }
+
+  fclose(sdf);
+  fclose(sff);
+  fclose(pdf);
+  fclose(pff);
 }
 
