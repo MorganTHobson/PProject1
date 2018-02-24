@@ -17,14 +17,14 @@ y = []
 
 for key,value in val.iteritems():
   x.append(int(key))
-  y.append(np.median(value))
+  y.append(512*512*256 * int(key) / np.median(value))
 
 plt.stem(x,y)
 
-plt.title('Title')
-plt.xlabel('X Values')
-plt.ylabel('Y Values')
+plt.title('Normalized Serial Data First')
+plt.xlabel('Filter Length')
+plt.ylabel('Filter Length * Data Length / Time (op/sec)')
 
-plt.xscale('log')
+#plt.xscale('log')
 
 plt.show()
