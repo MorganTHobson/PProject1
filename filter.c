@@ -135,8 +135,8 @@ void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int
 
   timeval_subtract ( &tresult, &tb, &ta );
 
-  printf ("Parallel filter first took %lu seconds and %lu microseconds.  Filter length = %d\n", tresult.tv_sec, tresult.tv_usec, filter_len );
-  fprintf (fp, "%d,%lu,%lu\n", filter_len, tresult.tv_sec, tresult.tv_usec);
+  printf ("Parallel filter first took %lu seconds and %lu microseconds.  Threads = %d\n", tresult.tv_sec, tresult.tv_usec, THREADS );
+  fprintf (fp, "%d,%lu,%lu\n", THREADS, tresult.tv_sec, tresult.tv_usec);
 }
 
 
@@ -167,8 +167,8 @@ void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* 
 
   timeval_subtract ( &tresult, &tb, &ta );
 
-  printf ("Parallel data first took %lu seconds and %lu microseconds.  Filter length = %d\n", tresult.tv_sec, tresult.tv_usec, filter_len );
-  fprintf (fp, "%d,%lu,%lu\n", filter_len, tresult.tv_sec, tresult.tv_usec);
+  printf ("Parallel data first took %lu seconds and %lu microseconds.  Threads = %d\n", tresult.tv_sec, tresult.tv_usec, THREADS );
+  fprintf (fp, "%d,%lu,%lu\n", THREADS, tresult.tv_sec, tresult.tv_usec);
 }
 
 
@@ -224,11 +224,11 @@ int main( int argc, char** argv )
 
   stat("parallel-data.csv", &st);
   if (st.st_size < 1)
-    fprintf(pdf, "filter length,sec,us\n");
+    fprintf(pdf, "threads,sec,us\n");
 
   stat("parallel-filter.csv", &st);
   if (st.st_size < 1)
-    fprintf(pff, "filter length,sec,us\n");
+    fprintf(pff, "threads,sec,us\n");
 
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
@@ -252,7 +252,8 @@ int main( int argc, char** argv )
   }
 
   /* Execute at a variety of filter lengths */
-  for ( int filter_len =1; filter_len<=FILTER_LEN; filter_len*=2) 
+  //for ( int filter_len =1; filter_len<=FILTER_LEN; filter_len*=2) 
+  for ( int filter_len =512; filter_len<=512; filter_len*=2) 
   {
     serialDataFirst ( DATA_LEN, input_array, serial_array, filter_len, filter_list, sdf );
     memset ( output_array, 0, DATA_LEN );
@@ -261,13 +262,13 @@ int main( int argc, char** argv )
     checkData ( serial_array, output_array );
     memset ( output_array, 0, DATA_LEN );
 
-//    parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff );
-//    checkData ( serial_array, output_array );
-//    memset ( output_array, 0, DATA_LEN );
+    parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff );
+    checkData ( serial_array, output_array );
+    memset ( output_array, 0, DATA_LEN );
 
-//    parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf );
-//    checkData ( serial_array, output_array );
-//    memset ( output_array, 0, DATA_LEN );
+    parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf );
+    checkData ( serial_array, output_array );
+    memset ( output_array, 0, DATA_LEN );
   }
 
   fclose(sdf);
