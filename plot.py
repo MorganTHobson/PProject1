@@ -19,10 +19,12 @@ for key,value in val.iteritems():
   x.append(int(key))
   y.append(np.median(value))
 
-plt.stem(x, y)
+plt.stem(x,y)
 
 plt.title('Title')
 plt.xlabel('X Values')
 plt.ylabel('Y Values')
+
+plt.xscale('log')
 
 plt.show()
