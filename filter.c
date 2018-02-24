@@ -19,7 +19,7 @@
 /* Example filter sizes */
 #define DATA_LEN  512*512*256
 #define FILTER_LEN  1024
-#define THREADS 1
+#define THREADS 16
 
 /* Subtract the `struct timeval' values X and Y,
     storing the result in RESULT.
@@ -253,22 +253,27 @@ int main( int argc, char** argv )
 
   /* Execute at a variety of filter lengths */
   //for ( int filter_len =1; filter_len<=FILTER_LEN; filter_len*=2) 
-  for ( int filter_len =512; filter_len<=512; filter_len*=2) 
+  for (int threads=2; threads <= THREADS; threads*=2)
   {
-    serialDataFirst ( DATA_LEN, input_array, serial_array, filter_len, filter_list, sdf );
-    memset ( output_array, 0, DATA_LEN );
+  /* Set thread count */
+  omp_set_num_threads(threads);
+    for ( int filter_len =512; filter_len<=512; filter_len*=2) 
+    {
+      serialDataFirst ( DATA_LEN, input_array, serial_array, filter_len, filter_list, sdf );
+      memset ( output_array, 0, DATA_LEN );
 
-    serialFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, sff );
-    checkData ( serial_array, output_array );
-    memset ( output_array, 0, DATA_LEN );
+      serialFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, sff );
+      checkData ( serial_array, output_array );
+      memset ( output_array, 0, DATA_LEN );
 
-    parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff );
-    checkData ( serial_array, output_array );
-    memset ( output_array, 0, DATA_LEN );
+      parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff );
+      checkData ( serial_array, output_array );
+      memset ( output_array, 0, DATA_LEN );
 
-    parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf );
-    checkData ( serial_array, output_array );
-    memset ( output_array, 0, DATA_LEN );
+      parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf );
+      checkData ( serial_array, output_array );
+      memset ( output_array, 0, DATA_LEN );
+    }
   }
 
   fclose(sdf);
