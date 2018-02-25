@@ -250,6 +250,39 @@ void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsign
   fprintf (fp, "%d,%lu,%lu\n", UNROLL, tresult.tv_sec, tresult.tv_usec);
 }
 
+void parallelDataFirstScheduled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
+{
+  /* Variables for timing */
+  struct timeval ta, tb, tresult;
+
+  /* Scheduling label */
+  char *schedule = "dynamic";
+
+  /* get initial time */
+  gettimeofday ( &ta, NULL );
+
+  /* for all elements in the data */
+  #pragma omp parallel for schedule(dynamic)
+  for (int x=0; x<data_len; x++) {
+    /* for all elements in the filter */ 
+    for (int y=0; y<filter_len; y++) { 
+      /* it the data element matches the filter */ 
+      if (input_array[x] == filter_list[y]) {
+        /* include it in the output */
+        output_array[x] = input_array[x];
+      }
+    }
+  }
+
+  /* get initial time */
+  gettimeofday ( &tb, NULL );
+
+  timeval_subtract ( &tresult, &tb, &ta );
+
+  printf ("Parallel data first scheduled took %lu seconds and %lu microseconds.  Scheduling = %s\n", tresult.tv_sec, tresult.tv_usec, schedule );
+  fprintf (fp, "%s,%lu,%lu\n", schedule, tresult.tv_sec, tresult.tv_usec);
+}
+
 
 void checkData ( unsigned int * serialarray, unsigned int * parallelarray )
 {
@@ -281,6 +314,7 @@ int main( int argc, char** argv )
   FILE *pdf;
   FILE *pff;
   FILE *pdu;
+  FILE *pdsch;
 
   /* Initialize csvs */
   sdf=fopen("serial-data.csv","a");
@@ -288,6 +322,7 @@ int main( int argc, char** argv )
   pdf=fopen("parallel-data.csv","a");
   pff=fopen("parallel-filter.csv","a");
   pdu=fopen("parallel-data-unrolled.csv","a");
+  pdsch=fopen("parallel-data-scheduled.csv","a");
 
   /* Initialize headers */
   struct stat st;
@@ -311,6 +346,10 @@ int main( int argc, char** argv )
   stat("parallel-data-unrolled.csv", &st);
   if (st.st_size < 1)
     fprintf(pdu, "unroll,sec,us\n");
+
+  stat("parallel-data-scheduled.csv", &st);
+  if (st.st_size < 1)
+    fprintf(pdu, "schedule,sec,us\n");
 
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
