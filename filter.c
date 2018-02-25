@@ -347,7 +347,7 @@ int main( int argc, char** argv )
 
   stat("parallel-data-scheduled.csv", &st);
   if (st.st_size < 1)
-    fprintf(pdu, "schedule,sec,us\n");
+    fprintf(pdsch, "schedule,sec,us\n");
 
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
@@ -378,7 +378,11 @@ int main( int argc, char** argv )
 
   for (int i = 0; i < 20; i++)
   {
-    parallelDataFirstUnrolled ( DATA_LEN, input_array, output_array, 512, filter_list, pdu);
+    //parallelDataFirstUnrolled ( DATA_LEN, input_array, output_array, 512, filter_list, pdu);
+    //checkData ( serial_array, output_array );
+    //memset ( output_array, 0, DATA_LEN );
+
+    parallelDataFirstScheduled ( DATA_LEN, input_array, output_array, 512, filter_list, pdsch);
     checkData ( serial_array, output_array );
     memset ( output_array, 0, DATA_LEN );
   }
