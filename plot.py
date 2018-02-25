@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-sdf = pd.read_csv("serial-filter.csv", header=0)
-pdf = pd.read_csv("parallel-filter.csv", header=0)
+sdf = pd.read_csv("serial-data.csv", header=0)
+pdf = pd.read_csv("parallel-data.csv", header=0)
 
 sval = dict()
 pval = dict()
@@ -26,12 +26,15 @@ x = []
 y = []
 
 for key,value in pval.iteritems():
+  speedup = serial_time/np.median(value)
   x.append(int(key))
-  y.append(serial_time/np.median(value))
+  y.append(speedup)
+  p = (8/speedup - 8)/(-7)
+  print("P({}) = {}".format(key,p))
 
 plt.stem(x,y)
 
-plt.title('Parallel Filter First Speedup')
+plt.title('Parallel Data First Speedup')
 plt.xlabel('Threads')
 plt.ylabel('Serial Time / Parallel Time')
 

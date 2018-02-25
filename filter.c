@@ -19,7 +19,7 @@
 /* Example filter sizes */
 #define DATA_LEN  512*512*256
 #define FILTER_LEN  1024
-#define THREADS 16
+#define THREADS 8
 #define UNROLL 2
 
 /* Subtract the `struct timeval' values X and Y,
@@ -140,83 +140,6 @@ void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int
   fprintf (fp, "%d,%lu,%lu\n", threads, tresult.tv_sec, tresult.tv_usec);
 }
 
-/* Unrolled version of the parallel filter first function */
-void parallelFilterFirstUnrolled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
-{
-  /* Variables for timing */
-  struct timeval ta, tb, tresult;
-
-  /* get initial time */
-  gettimeofday ( &ta, NULL );
-
-  /* for all elements in the filter */ 
-  #pragma omp parallel for
-  for (int y=0; y<filter_len; y++) { 
-    /* for all elements in the data */
-    for (int x=0; x<data_len; x+=UNROLL) {
-      /* it the data element matches the filter */ 
-      if (input_array[x] == filter_list[y]) {
-        /* include it in the output */
-        output_array[x] = input_array[x];
-      }
-      if (input_array[x+1] == filter_list[y]) {
-        output_array[x+1] = input_array[x];
-      }
-      /*
-      if (input_array[x+2] == filter_list[y]) {
-        output_array[x+2] = input_array[x];
-      }
-      if (input_array[x+3] == filter_list[y]) {
-        output_array[x+3] = input_array[x];
-      }
-      if (input_array[x+4] == filter_list[y]) {
-        output_array[x+4] = input_array[x];
-      }
-      if (input_array[x+5] == filter_list[y]) {
-        output_array[x+5] = input_array[x];
-      }
-      if (input_array[x+6] == filter_list[y]) {
-        output_array[x+6] = input_array[x];
-      }
-      if (input_array[x+7] == filter_list[y]) {
-        output_array[x+7] = input_array[x];
-      }
-      if (input_array[x+8] == filter_list[y]) {
-        output_array[x+8] = input_array[x];
-      }
-      if (input_array[x+9] == filter_list[y]) {
-        output_array[x+9] = input_array[x];
-      }
-      if (input_array[x+10] == filter_list[y]) {
-        output_array[x+10] = input_array[x];
-      }
-      if (input_array[x+11] == filter_list[y]) {
-        output_array[x+11] = input_array[x];
-      }
-      if (input_array[x+12] == filter_list[y]) {
-        output_array[x+12] = input_array[x];
-      }
-      if (input_array[x+13] == filter_list[y]) {
-        output_array[x+13] = input_array[x];
-      }
-      if (input_array[x+14] == filter_list[y]) {
-        output_array[x+14] = input_array[x];
-      }
-      if (input_array[x+15] == filter_list[y]) {
-        output_array[x+15] = input_array[x];
-      }
-      */
-    }
-  }
-
-  /* get initial time */
-  gettimeofday ( &tb, NULL );
-
-  timeval_subtract ( &tresult, &tb, &ta );
-
-  printf ("Parallel filter first unrolled took %lu seconds and %lu microseconds.  Unroll = %d\n", tresult.tv_sec, tresult.tv_usec, UNROLL );
-  fprintf (fp, "%d,%lu,%lu\n", UNROLL, tresult.tv_sec, tresult.tv_usec);
-}
 
 
 /* Function to apply the filter with the filter list in the outside loop */
@@ -251,7 +174,7 @@ void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* 
 }
 
 /* Unrolled version of the parallel data first function */
-void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
+void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
@@ -268,51 +191,51 @@ void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsign
       if (input_array[x] == filter_list[y]) {
         output_array[x] = input_array[x];
       }
-      if (input_array[x+1] == filter_list[y]) {
-        output_array[x+1] = input_array[x];
+      else if (input_array[x] == filter_list[y+1]) {
+        output_array[x] = input_array[x];
       }
       /*
-      if (input_array[x+2] == filter_list[y]) {
-        output_array[x+2] = input_array[x];
+      if (input_array[x] == filter_list[y+2]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+3] == filter_list[y]) {
-        output_array[x+3] = input_array[x];
+      if (input_array[x] == filter_list[y+3]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+4] == filter_list[y]) {
-        output_array[x+4] = input_array[x];
+      if (input_array[x] == filter_list[y+4]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+5] == filter_list[y]) {
-        output_array[x+5] = input_array[x];
+      if (input_array[x] == filter_list[y+5]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+6] == filter_list[y]) {
-        output_array[x+6] = input_array[x];
+      if (input_array[x] == filter_list[y+6]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+7] == filter_list[y]) {
-        output_array[x+7] = input_array[x];
+      if (input_array[x] == filter_list[y+7]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+8] == filter_list[y]) {
-        output_array[x+8] = input_array[x];
+      if (input_array[x] == filter_list[y+8]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+9] == filter_list[y]) {
-        output_array[x+9] = input_array[x];
+      if (input_array[x] == filter_list[y+9]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+10] == filter_list[y]) {
-        output_array[x+10] = input_array[x];
+      if (input_array[x] == filter_list[y+10]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+11] == filter_list[y]) {
-        output_array[x+11] = input_array[x];
+      if (input_array[x] == filter_list[y+11]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+12] == filter_list[y]) {
-        output_array[x+12] = input_array[x];
+      if (input_array[x] == filter_list[y+12]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+13] == filter_list[y]) {
-        output_array[x+13] = input_array[x];
+      if (input_array[x] == filter_list[y+13]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+14] == filter_list[y]) {
-        output_array[x+14] = input_array[x];
+      if (input_array[x] == filter_list[y+14]) {
+        output_array[x] = input_array[x];
       }
-      if (input_array[x+15] == filter_list[y]) {
-        output_array[x+15] = input_array[x];
+      if (input_array[x] == filter_list[y+15]) {
+        output_array[x] = input_array[x];
       }
       */
     }
@@ -323,7 +246,7 @@ void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsign
 
   timeval_subtract ( &tresult, &tb, &ta );
 
-  printf ("Parallel data first unrolled took %lu seconds and %lu microseconds.  Unroll = %d\n", tresult.tv_sec, tresult.tv_usec, UNROLL );
+  printf ("Parallel data first unrolled took %lu seconds and %lu microseconds.  Unroll = %d\n", tresult.tv_sec, tresult.tv_usec, UNROLL);
   fprintf (fp, "%d,%lu,%lu\n", UNROLL, tresult.tv_sec, tresult.tv_usec);
 }
 
@@ -358,7 +281,6 @@ int main( int argc, char** argv )
   FILE *pdf;
   FILE *pff;
   FILE *pdu;
-  FILE *pfu;
 
   /* Initialize csvs */
   sdf=fopen("serial-data.csv","a");
@@ -366,7 +288,6 @@ int main( int argc, char** argv )
   pdf=fopen("parallel-data.csv","a");
   pff=fopen("parallel-filter.csv","a");
   pdu=fopen("parallel-data-unrolled.csv","a");
-  pfu=fopen("parallel-filter-unrolled.csv","a");
 
   /* Initialize headers */
   struct stat st;
@@ -389,11 +310,7 @@ int main( int argc, char** argv )
 
   stat("parallel-data-unrolled.csv", &st);
   if (st.st_size < 1)
-    fprintf(pdf, "unroll,sec,us\n");
-
-  stat("parallel-filter-unrolled.csv", &st);
-  if (st.st_size < 1)
-    fprintf(pff, "unroll,sec,us\n");
+    fprintf(pdu, "unroll,sec,us\n");
 
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
@@ -416,36 +333,51 @@ int main( int argc, char** argv )
     filter_list[y] = y;
   }
 
+
+  omp_set_num_threads(THREADS);
+
+  serialDataFirst ( DATA_LEN, input_array, serial_array, 512, filter_list, sdf );
+  memset ( output_array, 0, DATA_LEN );
+
+  parallelDataFirstUnrolled ( DATA_LEN, input_array, output_array, 512, filter_list, pdu);
+  checkData ( serial_array, output_array );
+  memset ( output_array, 0, DATA_LEN );
+
   /* Execute at a variety of filter lengths */
   //for ( int filter_len =1; filter_len<=FILTER_LEN; filter_len*=2) 
-  for (int threads=2; threads <= THREADS; threads*=2)
+
+  /*
+  for (int threads=1; threads <= THREADS; threads*=2)
   {
-  /* Set thread count */
   omp_set_num_threads(threads);
     for ( int filter_len =512; filter_len<=512; filter_len*=2) 
     {
       serialDataFirst ( DATA_LEN, input_array, serial_array, filter_len, filter_list, sdf );
       memset ( output_array, 0, DATA_LEN );
 
-      serialFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, sff );
+      parallelDataFirstUnrolled ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdu);
       checkData ( serial_array, output_array );
       memset ( output_array, 0, DATA_LEN );
 
-      parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff, threads);
-      checkData ( serial_array, output_array );
-      memset ( output_array, 0, DATA_LEN );
+      //serialFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, sff );
+      //checkData ( serial_array, output_array );
+      //memset ( output_array, 0, DATA_LEN );
 
-      parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf, threads);
-      checkData ( serial_array, output_array );
-      memset ( output_array, 0, DATA_LEN );
+      //parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff, threads);
+      //checkData ( serial_array, output_array );
+      //memset ( output_array, 0, DATA_LEN );
+
+      //parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf, threads);
+      //checkData ( serial_array, output_array );
+      //memset ( output_array, 0, DATA_LEN );
     }
   }
+  */
 
   fclose(sdf);
   fclose(sff);
   fclose(pdf);
   fclose(pff);
   fclose(pdu);
-  fclose(pfu);
 }
 
