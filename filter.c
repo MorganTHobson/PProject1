@@ -20,6 +20,7 @@
 #define DATA_LEN  512*512*256
 #define FILTER_LEN  1024
 #define THREADS 16
+#define UNROLL 2
 
 /* Subtract the `struct timeval' values X and Y,
     storing the result in RESULT.
@@ -139,6 +140,84 @@ void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int
   fprintf (fp, "%d,%lu,%lu\n", threads, tresult.tv_sec, tresult.tv_usec);
 }
 
+/* Unrolled version of the parallel filter first function */
+void parallelFilterFirstUnrolled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
+{
+  /* Variables for timing */
+  struct timeval ta, tb, tresult;
+
+  /* get initial time */
+  gettimeofday ( &ta, NULL );
+
+  /* for all elements in the filter */ 
+  #pragma omp parallel for
+  for (int y=0; y<filter_len; y++) { 
+    /* for all elements in the data */
+    for (int x=0; x<data_len; x+=UNROLL) {
+      /* it the data element matches the filter */ 
+      if (input_array[x] == filter_list[y]) {
+        /* include it in the output */
+        output_array[x] = input_array[x];
+      }
+      if (input_array[x+1] == filter_list[y]) {
+        output_array[x+1] = input_array[x];
+      }
+      /*
+      if (input_array[x+2] == filter_list[y]) {
+        output_array[x+2] = input_array[x];
+      }
+      if (input_array[x+3] == filter_list[y]) {
+        output_array[x+3] = input_array[x];
+      }
+      if (input_array[x+4] == filter_list[y]) {
+        output_array[x+4] = input_array[x];
+      }
+      if (input_array[x+5] == filter_list[y]) {
+        output_array[x+5] = input_array[x];
+      }
+      if (input_array[x+6] == filter_list[y]) {
+        output_array[x+6] = input_array[x];
+      }
+      if (input_array[x+7] == filter_list[y]) {
+        output_array[x+7] = input_array[x];
+      }
+      if (input_array[x+8] == filter_list[y]) {
+        output_array[x+8] = input_array[x];
+      }
+      if (input_array[x+9] == filter_list[y]) {
+        output_array[x+9] = input_array[x];
+      }
+      if (input_array[x+10] == filter_list[y]) {
+        output_array[x+10] = input_array[x];
+      }
+      if (input_array[x+11] == filter_list[y]) {
+        output_array[x+11] = input_array[x];
+      }
+      if (input_array[x+12] == filter_list[y]) {
+        output_array[x+12] = input_array[x];
+      }
+      if (input_array[x+13] == filter_list[y]) {
+        output_array[x+13] = input_array[x];
+      }
+      if (input_array[x+14] == filter_list[y]) {
+        output_array[x+14] = input_array[x];
+      }
+      if (input_array[x+15] == filter_list[y]) {
+        output_array[x+15] = input_array[x];
+      }
+      */
+    }
+  }
+
+  /* get initial time */
+  gettimeofday ( &tb, NULL );
+
+  timeval_subtract ( &tresult, &tb, &ta );
+
+  printf ("Parallel filter first unrolled took %lu seconds and %lu microseconds.  Unroll = %d\n", tresult.tv_sec, tresult.tv_usec, UNROLL );
+  fprintf (fp, "%d,%lu,%lu\n", UNROLL, tresult.tv_sec, tresult.tv_usec);
+}
+
 
 /* Function to apply the filter with the filter list in the outside loop */
 void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp, int threads)
@@ -171,6 +250,83 @@ void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* 
   fprintf (fp, "%d,%lu,%lu\n", threads, tresult.tv_sec, tresult.tv_usec);
 }
 
+/* Unrolled version of the parallel data first function */
+void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
+{
+  /* Variables for timing */
+  struct timeval ta, tb, tresult;
+
+  /* get initial time */
+  gettimeofday ( &ta, NULL );
+
+  /* for all elements in the data */
+  #pragma omp parallel for
+  for (int x=0; x<data_len; x++) {
+    /* for all elements in the filter */ 
+    for (int y=0; y<filter_len; y+=UNROLL) { 
+      /* it the data element matches the filter */ 
+      if (input_array[x] == filter_list[y]) {
+        output_array[x] = input_array[x];
+      }
+      if (input_array[x+1] == filter_list[y]) {
+        output_array[x+1] = input_array[x];
+      }
+      /*
+      if (input_array[x+2] == filter_list[y]) {
+        output_array[x+2] = input_array[x];
+      }
+      if (input_array[x+3] == filter_list[y]) {
+        output_array[x+3] = input_array[x];
+      }
+      if (input_array[x+4] == filter_list[y]) {
+        output_array[x+4] = input_array[x];
+      }
+      if (input_array[x+5] == filter_list[y]) {
+        output_array[x+5] = input_array[x];
+      }
+      if (input_array[x+6] == filter_list[y]) {
+        output_array[x+6] = input_array[x];
+      }
+      if (input_array[x+7] == filter_list[y]) {
+        output_array[x+7] = input_array[x];
+      }
+      if (input_array[x+8] == filter_list[y]) {
+        output_array[x+8] = input_array[x];
+      }
+      if (input_array[x+9] == filter_list[y]) {
+        output_array[x+9] = input_array[x];
+      }
+      if (input_array[x+10] == filter_list[y]) {
+        output_array[x+10] = input_array[x];
+      }
+      if (input_array[x+11] == filter_list[y]) {
+        output_array[x+11] = input_array[x];
+      }
+      if (input_array[x+12] == filter_list[y]) {
+        output_array[x+12] = input_array[x];
+      }
+      if (input_array[x+13] == filter_list[y]) {
+        output_array[x+13] = input_array[x];
+      }
+      if (input_array[x+14] == filter_list[y]) {
+        output_array[x+14] = input_array[x];
+      }
+      if (input_array[x+15] == filter_list[y]) {
+        output_array[x+15] = input_array[x];
+      }
+      */
+    }
+  }
+
+  /* get initial time */
+  gettimeofday ( &tb, NULL );
+
+  timeval_subtract ( &tresult, &tb, &ta );
+
+  printf ("Parallel data first unrolled took %lu seconds and %lu microseconds.  Unroll = %d\n", tresult.tv_sec, tresult.tv_usec, UNROLL );
+  fprintf (fp, "%d,%lu,%lu\n", UNROLL, tresult.tv_sec, tresult.tv_usec);
+}
+
 
 void checkData ( unsigned int * serialarray, unsigned int * parallelarray )
 {
@@ -201,12 +357,16 @@ int main( int argc, char** argv )
   FILE *sff;
   FILE *pdf;
   FILE *pff;
+  FILE *pdu;
+  FILE *pfu;
 
   /* Initialize csvs */
   sdf=fopen("serial-data.csv","a");
   sff=fopen("serial-filter.csv","a");
   pdf=fopen("parallel-data.csv","a");
   pff=fopen("parallel-filter.csv","a");
+  pdu=fopen("parallel-data-unrolled.csv","a");
+  pfu=fopen("parallel-filter-unrolled.csv","a");
 
   /* Initialize headers */
   struct stat st;
@@ -226,6 +386,14 @@ int main( int argc, char** argv )
   stat("parallel-filter.csv", &st);
   if (st.st_size < 1)
     fprintf(pff, "threads,sec,us\n");
+
+  stat("parallel-data-unrolled.csv", &st);
+  if (st.st_size < 1)
+    fprintf(pdf, "unroll,sec,us\n");
+
+  stat("parallel-filter-unrolled.csv", &st);
+  if (st.st_size < 1)
+    fprintf(pff, "unroll,sec,us\n");
 
   /* Initialize the data. Values don't matter much. */
   posix_memalign ( (void**)&input_array, 4096,  DATA_LEN * sizeof(unsigned int));
@@ -277,5 +445,7 @@ int main( int argc, char** argv )
   fclose(sff);
   fclose(pdf);
   fclose(pff);
+  fclose(pdu);
+  fclose(pfu);
 }
 
