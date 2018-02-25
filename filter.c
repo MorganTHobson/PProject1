@@ -109,7 +109,7 @@ void serialDataFirst ( int data_len, unsigned int* input_array, unsigned int* ou
 }
 
 /* Function to apply the filter with the filter list in the outside loop */
-void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
+void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp, int threads)
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
@@ -135,13 +135,13 @@ void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int
 
   timeval_subtract ( &tresult, &tb, &ta );
 
-  printf ("Parallel filter first took %lu seconds and %lu microseconds.  Threads = %d\n", tresult.tv_sec, tresult.tv_usec, THREADS );
-  fprintf (fp, "%d,%lu,%lu\n", THREADS, tresult.tv_sec, tresult.tv_usec);
+  printf ("Parallel filter first took %lu seconds and %lu microseconds.  Threads = %d\n", tresult.tv_sec, tresult.tv_usec, threads );
+  fprintf (fp, "%d,%lu,%lu\n", threads, tresult.tv_sec, tresult.tv_usec);
 }
 
 
 /* Function to apply the filter with the filter list in the outside loop */
-void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
+void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp, int threads)
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
@@ -167,8 +167,8 @@ void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* 
 
   timeval_subtract ( &tresult, &tb, &ta );
 
-  printf ("Parallel data first took %lu seconds and %lu microseconds.  Threads = %d\n", tresult.tv_sec, tresult.tv_usec, THREADS );
-  fprintf (fp, "%d,%lu,%lu\n", THREADS, tresult.tv_sec, tresult.tv_usec);
+  printf ("Parallel data first took %lu seconds and %lu microseconds.  Threads = %d\n", tresult.tv_sec, tresult.tv_usec, threads );
+  fprintf (fp, "%d,%lu,%lu\n", threads, tresult.tv_sec, tresult.tv_usec);
 }
 
 
@@ -195,9 +195,6 @@ int main( int argc, char** argv )
   unsigned int * serial_array;
   unsigned int * output_array;
   unsigned int * filter_list;
-
-  /* Set thread count */
-  omp_set_num_threads(THREADS);
 
   /* Makde csv pointers */
   FILE *sdf;
@@ -266,11 +263,11 @@ int main( int argc, char** argv )
       checkData ( serial_array, output_array );
       memset ( output_array, 0, DATA_LEN );
 
-      parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff );
+      parallelFilterFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pff, threads);
       checkData ( serial_array, output_array );
       memset ( output_array, 0, DATA_LEN );
 
-      parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf );
+      parallelDataFirst ( DATA_LEN, input_array, output_array, filter_len, filter_list, pdf, threads);
       checkData ( serial_array, output_array );
       memset ( output_array, 0, DATA_LEN );
     }
