@@ -20,7 +20,7 @@
 #define DATA_LEN  512*512*256
 #define FILTER_LEN  1024
 #define THREADS 8
-#define UNROLL 2
+#define UNROLL 16
 
 /* Subtract the `struct timeval' values X and Y,
     storing the result in RESULT.
@@ -187,14 +187,13 @@ void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsign
   for (int x=0; x<data_len; x++) {
     /* for all elements in the filter */ 
     for (int y=0; y<filter_len; y+=UNROLL) { 
-      /* it the data element matches the filter */ 
+      /* check if the data element matches the filter */ 
       if (input_array[x] == filter_list[y]) {
         output_array[x] = input_array[x];
       }
       else if (input_array[x] == filter_list[y+1]) {
         output_array[x] = input_array[x];
       }
-      /*
       if (input_array[x] == filter_list[y+2]) {
         output_array[x] = input_array[x];
       }
@@ -237,7 +236,6 @@ void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsign
       if (input_array[x] == filter_list[y+15]) {
         output_array[x] = input_array[x];
       }
-      */
     }
   }
 
@@ -339,9 +337,12 @@ int main( int argc, char** argv )
   serialDataFirst ( DATA_LEN, input_array, serial_array, 512, filter_list, sdf );
   memset ( output_array, 0, DATA_LEN );
 
-  parallelDataFirstUnrolled ( DATA_LEN, input_array, output_array, 512, filter_list, pdu);
-  checkData ( serial_array, output_array );
-  memset ( output_array, 0, DATA_LEN );
+  for (int i = 0; i < 20; i++)
+  {
+    parallelDataFirstUnrolled ( DATA_LEN, input_array, output_array, 512, filter_list, pdu);
+    checkData ( serial_array, output_array );
+    memset ( output_array, 0, DATA_LEN );
+  }
 
   /* Execute at a variety of filter lengths */
   //for ( int filter_len =1; filter_len<=FILTER_LEN; filter_len*=2) 
