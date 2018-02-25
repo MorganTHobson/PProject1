@@ -248,7 +248,7 @@ void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsign
   fprintf (fp, "%d,%lu,%lu\n", UNROLL, tresult.tv_sec, tresult.tv_usec);
 }
 
-void parallelDataFirstScheduled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
+void parallelDataFirstScheduledDynamic ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
@@ -261,6 +261,107 @@ void parallelDataFirstScheduled ( int data_len, unsigned int* input_array, unsig
 
   /* for all elements in the data */
   #pragma omp parallel for schedule(dynamic)
+  for (int x=0; x<data_len; x++) {
+    /* for all elements in the filter */ 
+    for (int y=0; y<filter_len; y++) { 
+      /* it the data element matches the filter */ 
+      if (input_array[x] == filter_list[y]) {
+        /* include it in the output */
+        output_array[x] = input_array[x];
+      }
+    }
+  }
+
+  /* get initial time */
+  gettimeofday ( &tb, NULL );
+
+  timeval_subtract ( &tresult, &tb, &ta );
+
+  printf ("Parallel data first scheduled took %lu seconds and %lu microseconds.  Scheduling = %s\n", tresult.tv_sec, tresult.tv_usec, schedule );
+  fprintf (fp, "%s,%lu,%lu\n", schedule, tresult.tv_sec, tresult.tv_usec);
+}
+
+void parallelDataFirstScheduledGuided ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
+{
+  /* Variables for timing */
+  struct timeval ta, tb, tresult;
+
+  /* Scheduling label */
+  char *schedule = "guided";
+
+  /* get initial time */
+  gettimeofday ( &ta, NULL );
+
+  /* for all elements in the data */
+  #pragma omp parallel for schedule(guided)
+  for (int x=0; x<data_len; x++) {
+    /* for all elements in the filter */ 
+    for (int y=0; y<filter_len; y++) { 
+      /* it the data element matches the filter */ 
+      if (input_array[x] == filter_list[y]) {
+        /* include it in the output */
+        output_array[x] = input_array[x];
+      }
+    }
+  }
+
+  /* get initial time */
+  gettimeofday ( &tb, NULL );
+
+  timeval_subtract ( &tresult, &tb, &ta );
+
+  printf ("Parallel data first scheduled took %lu seconds and %lu microseconds.  Scheduling = %s\n", tresult.tv_sec, tresult.tv_usec, schedule );
+  fprintf (fp, "%s,%lu,%lu\n", schedule, tresult.tv_sec, tresult.tv_usec);
+}
+
+
+void parallelDataFirstScheduledStatic32 ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
+{
+  /* Variables for timing */
+  struct timeval ta, tb, tresult;
+
+  /* Scheduling label */
+  char *schedule = "static32";
+
+  /* get initial time */
+  gettimeofday ( &ta, NULL );
+
+  /* for all elements in the data */
+  #pragma omp parallel for schedule(static, 32)
+  for (int x=0; x<data_len; x++) {
+    /* for all elements in the filter */ 
+    for (int y=0; y<filter_len; y++) { 
+      /* it the data element matches the filter */ 
+      if (input_array[x] == filter_list[y]) {
+        /* include it in the output */
+        output_array[x] = input_array[x];
+      }
+    }
+  }
+
+  /* get initial time */
+  gettimeofday ( &tb, NULL );
+
+  timeval_subtract ( &tresult, &tb, &ta );
+
+  printf ("Parallel data first scheduled took %lu seconds and %lu microseconds.  Scheduling = %s\n", tresult.tv_sec, tresult.tv_usec, schedule );
+  fprintf (fp, "%s,%lu,%lu\n", schedule, tresult.tv_sec, tresult.tv_usec);
+}
+
+
+void parallelDataFirstScheduledStatic64 ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
+{
+  /* Variables for timing */
+  struct timeval ta, tb, tresult;
+
+  /* Scheduling label */
+  char *schedule = "static64";
+
+  /* get initial time */
+  gettimeofday ( &ta, NULL );
+
+  /* for all elements in the data */
+  #pragma omp parallel for schedule(static, 64)
   for (int x=0; x<data_len; x++) {
     /* for all elements in the filter */ 
     for (int y=0; y<filter_len; y++) { 
@@ -382,7 +483,19 @@ int main( int argc, char** argv )
     //checkData ( serial_array, output_array );
     //memset ( output_array, 0, DATA_LEN );
 
-    parallelDataFirstScheduled ( DATA_LEN, input_array, output_array, 512, filter_list, pdsch);
+    parallelDataFirstScheduledDynamic ( DATA_LEN, input_array, output_array, 512, filter_list, pdsch);
+    checkData ( serial_array, output_array );
+    memset ( output_array, 0, DATA_LEN );
+
+    parallelDataFirstScheduledGuided ( DATA_LEN, input_array, output_array, 512, filter_list, pdsch);
+    checkData ( serial_array, output_array );
+    memset ( output_array, 0, DATA_LEN );
+
+    parallelDataFirstScheduledStatic32 ( DATA_LEN, input_array, output_array, 512, filter_list, pdsch);
+    checkData ( serial_array, output_array );
+    memset ( output_array, 0, DATA_LEN );
+
+    parallelDataFirstScheduledStatic64 ( DATA_LEN, input_array, output_array, 512, filter_list, pdsch);
     checkData ( serial_array, output_array );
     memset ( output_array, 0, DATA_LEN );
   }
