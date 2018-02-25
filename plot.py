@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 sdf = pd.read_csv("serial-data.csv", header=0)
-pdf = pd.read_csv("parallel-data.csv", header=0)
+pdf = pd.read_csv("parallel-data-unrolled.csv", header=0)
 
 sval = dict()
 pval = dict()
@@ -17,10 +17,10 @@ for index, row in sdf.iterrows():
 serial_time = np.median(sval[512])
 
 for index, row in pdf.iterrows():
-  if not row['threads'] in pval:
-    pval[row['threads']] = [float(row['sec']) + float(row['us'])/1000000]
+  if not row['unroll'] in pval:
+    pval[row['unroll']] = [float(row['sec']) + float(row['us'])/1000000]
   else:
-    pval[row['threads']].append(float(row['sec']) + float(row['us'])/1000000)
+    pval[row['unroll']].append(float(row['sec']) + float(row['us'])/1000000)
 
 x = []
 y = []
@@ -34,10 +34,10 @@ for key,value in pval.iteritems():
 
 plt.stem(x,y)
 
-plt.title('Parallel Data First Speedup')
-plt.xlabel('Threads')
-plt.ylabel('Serial Time / Parallel Time')
+plt.title('Parallel Data First Unrolled Speedup (log)')
+plt.xlabel('Unroll Level')
+plt.ylabel('Serial Time / Parallel Time (Unrolled)')
 
-#plt.xscale('log')
+plt.xscale('log')
 
 plt.show()
