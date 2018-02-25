@@ -140,7 +140,7 @@ void parallelFilterFirst ( int data_len, unsigned int* input_array, unsigned int
   fprintf (fp, "%d,%lu,%lu\n", THREADS, tresult.tv_sec, tresult.tv_usec);
 }
 
-
+/* Unrolled version of the parallel filter first function */
 void parallelFilterFirstUnrolled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp)
 {
   /* Variables for timing */
@@ -250,8 +250,8 @@ void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* 
   fprintf (fp, "%d,%lu,%lu\n", THREADS, tresult.tv_sec, tresult.tv_usec);
 }
 
-/* Function to apply the filter with the filter list in the outside loop */
-void parallelDataFirst ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
+/* Unrolled version of the parallel data first function */
+void parallelDataFirstUnrolled ( int data_len, unsigned int* input_array, unsigned int* output_array, int filter_len, unsigned int* filter_list, FILE *fp )
 {
   /* Variables for timing */
   struct timeval ta, tb, tresult;
